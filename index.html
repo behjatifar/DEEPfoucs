@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Focus Dashboard</title>
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+    <!-- Ambient Background Gradients -->
+    <div class="ambient-glow glow-blue"></div>
+    <div class="ambient-glow glow-purple"></div>
+
+    <div class="app-container">
+        <!-- Main Content Area: Timer & Thoughts -->
+        <main class="main-content">
+            
+            <!-- Timer Section -->
+            <section class="timer-section glass-panel">
+                <div class="timer-header">
+                    <div class="mode-info">
+                        <h2 id="mode-display">Work Mode</h2>
+                        <div class="date-container">
+                            <span id="date-shamsi" class="date-text"></span>
+                            <span id="date-gregorian" class="date-text"></span>
+                        </div>
+                    </div>
+                    <span class="stats">Pomodoros Today: <strong id="stats-count">0</strong></span>
+                </div>
+                
+                <div class="timer-circle" id="timer-circle">
+                    <div class="timer-inner">
+                        <span id="time-display" class="time-text">25:00</span>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button id="btn-toggle" class="btn primary">Start</button>
+                    <button id="btn-reset" class="btn secondary">Reset</button>
+                </div>
+
+                <div class="timer-settings">
+                    <label>Work (min): <input type="number" id="input-work-time" value="25" min="1"></label>
+                    <label>Rest (min): <input type="number" id="input-rest-time" value="5" min="1"></label>
+                </div>
+            </section>
+
+            <!-- Thoughts Section (Bottom) -->
+            <section class="thoughts-section glass-panel">
+                <div class="section-header">
+                    <h3>Thoughts & Brain Dump</h3>
+                    <button class="btn secondary btn-sm" data-spoiler-group="thoughts" title="Toggle spoiler for all thoughts">
+                        👁️ Spoiler All
+                    </button>
+                </div>
+                <form id="thought-form" class="input-group">
+                    <input type="text" id="thought-input" placeholder="Jot down a quick thought..." autocomplete="off">
+                    <button type="submit" class="btn primary">+</button>
+                </form>
+                <ul id="thoughts-list" class="item-list"></ul>
+            </section>
+        </main>
+
+        <!-- Sidebar: Works / To-Do List -->
+        <aside class="sidebar glass-panel">
+            <div class="section-header">
+                <div class="header-actions">
+                    <button id="btn-export-report" class="btn secondary btn-sm" title="Download Daily Report Image (PNG)">
+                        📸 Export
+                    </button>
+                    <button class="btn secondary btn-sm" data-spoiler-group="works" title="Toggle spoiler for all tasks">
+                        👁️ Spoiler All
+                    </button>
+                    <button id="btn-open-trash" class="btn secondary btn-sm trash-trigger" title="Open Recycle Bin">
+                        🗑️ <span id="trash-count">0</span>
+                    </button>
+                </div>
+            </div>
+            <form id="work-form" class="input-group">
+                <input type="text" id="work-input" placeholder="Add a new task..." autocomplete="off">
+                <button type="submit" class="btn primary">+</button>
+            </form>
+            <ul id="works-list" class="item-list"></ul>
+        </aside>
+    </div>
+
+    <!-- Recycle Bin Modal -->
+    <div id="trash-modal" class="modal-overlay hidden">
+        <div class="modal-panel glass-panel">
+            <div class="section-header">
+                <h3>🗑️ Recycle Bin (Archived)</h3>
+                <div class="header-actions">
+                    <button id="btn-empty-trash" class="btn secondary btn-sm danger-text" title="Permanently delete all items">
+                        Empty All
+                    </button>
+                    <button id="btn-close-trash" class="action-btn delete-btn" title="Close">×</button>
+                </div>
+            </div>
+            <ul id="trash-list" class="item-list trash-items"></ul>
+        </div>
+    </div>
+
+    <!-- Scripts loaded sequentially to avoid CORS issues locally -->
+    <script src="storage.js"></script>
+    <script src="timer.js"></script>
+    <script src="exporter.js"></script>
+    <script src="app.js"></script>
+    
+</body>
+</html>
