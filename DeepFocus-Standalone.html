@@ -1,3 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Focus Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23131b42'/%3E%3Cstop offset='100%25' stop-color='%23070a1c'/%3E%3C/linearGradient%3E%3ClinearGradient id='cyan' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23a5f3fc'/%3E%3Cstop offset='100%25' stop-color='%2300bcd4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23bg)' stroke='%232c3e75' stroke-width='2'/%3E%3Cpath d='M16 18V13h5M48 18V13h-5' fill='none' stroke='%2367e8f9' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M22 52h20M25 36c0 6-6 8-6 14h26c0-6-6-8-6-14-3-2-4-4-7-4s-4 2-7 4z' fill='none' stroke='url(%23cyan)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M23 49h18l-9-8-9 8z' fill='%2322d3ee'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%230f172a' stroke='url(%23cyan)' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='24' r='6' fill='none' stroke='%2338bdf8' stroke-width='1.5'/%3E%3Cpath d='M32 17l1.8 5.2L39 24l-5.2 1.8L32 31l-1.8-5.2L25 24l5.2-1.8z' fill='%23ffffff'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+    <!-- Ambient Background Gradients -->
+    <div class="ambient-glow glow-blue"></div>
+    <div class="ambient-glow glow-purple"></div>
+
+    <div class="app-container">
+        <!-- Main Content Area: Timer & Thoughts -->
+        <main class="main-content">
+            
+            <!-- Timer Section -->
+            <section class="timer-section glass-panel">
+                <div class="timer-header">
+                    <div class="mode-info">
+                        <h2 id="mode-display">Work Mode</h2>
+                        <div class="date-container">
+                            <span id="date-shamsi" class="date-text"></span>
+                            <span id="date-gregorian" class="date-text"></span>
+                        </div>
+                    </div>
+                    <span class="stats">Pomodoros Today: <strong id="stats-count">0</strong></span>
+                </div>
+                
+                <div class="timer-circle" id="timer-circle">
+                    <div class="timer-inner">
+                        <span id="time-display" class="time-text">25:00</span>
+                    </div>
+                </div>
+
+                <div class="timer-controls">
+                    <button id="btn-toggle" class="btn primary">Start</button>
+                    <button id="btn-reset" class="btn secondary">Reset</button>
+                </div>
+
+                <div class="timer-settings">
+                    <label>Work (min): <input type="number" id="input-work-time" value="25" min="1"></label>
+                    <label>Rest (min): <input type="number" id="input-rest-time" value="5" min="1"></label>
+                </div>
+            </section>
+
+            <!-- Thoughts Section (Bottom) -->
+            <section class="thoughts-section glass-panel">
+                <div class="section-header">
+                    <h3>Thoughts & Brain Dump</h3>
+                    <button class="btn secondary btn-sm" data-spoiler-group="thoughts" title="Toggle spoiler for all thoughts">
+                        👁️ Spoiler All
+                    </button>
+                </div>
+                <form id="thought-form" class="input-group">
+                    <input type="text" id="thought-input" placeholder="Jot down a quick thought..." autocomplete="off">
+                    <button type="submit" class="btn primary">+</button>
+                </form>
+                <ul id="thoughts-list" class="item-list"></ul>
+            </section>
+        </main>
+
+        <!-- Sidebar: Works / To-Do List -->
+        <aside class="sidebar glass-panel">
+            <div class="section-header">
+                <div class="header-actions">
+                    <button id="btn-export-report" class="btn secondary btn-sm" title="Download Daily Report Image (PNG)">
+                        📸 Export
+                    </button>
+                    <button class="btn secondary btn-sm" data-spoiler-group="works" title="Toggle spoiler for all tasks">
+                        👁️ Spoiler All
+                    </button>
+                    <button id="btn-open-trash" class="btn secondary btn-sm trash-trigger" title="Open Recycle Bin">
+                        🗑️ <span id="trash-count">0</span>
+                    </button>
+                </div>
+            </div>
+            <form id="work-form" class="input-group">
+                <input type="text" id="work-input" placeholder="Add a new task..." autocomplete="off">
+                <button type="submit" class="btn primary">+</button>
+            </form>
+            <ul id="works-list" class="item-list"></ul>
+        </aside>
+    </div>
+
+    <!-- Recycle Bin Modal -->
+    <div id="trash-modal" class="modal-overlay hidden">
+        <div class="modal-panel glass-panel">
+            <div class="section-header">
+                <h3>🗑️ Recycle Bin (Archived)</h3>
+                <div class="header-actions">
+                    <button id="btn-empty-trash" class="btn secondary btn-sm danger-text" title="Permanently delete all items">
+                        Empty All
+                    </button>
+                    <button id="btn-close-trash" class="action-btn delete-btn" title="Close">×</button>
+                </div>
+            </div>
+            <ul id="trash-list" class="item-list trash-items"></ul>
+        </div>
+    </div>
+    <!-- 10-Second Session Preparation Overlay -->
+    <div id="prep-overlay" class="modal-overlay hidden">
+        <div class="modal-panel glass-panel prep-panel" dir="rtl">
+            <div class="prep-header">
+                <span class="prep-badge">آماده‌سازی ذهن (<strong id="prep-countdown">10</strong>s)</span>
+                <button id="btn-skip-prep" class="btn secondary btn-sm">رد کردن ⏭️</button>
+            </div>
+            <h3 class="prep-title">🚀 در حال شروع سشن جدید هستیم...</h3>
+            <ul id="prep-messages" class="prep-list"></ul>
+            <p id="prep-footer" class="prep-footer"></p>
+            <div class="prep-progress-track">
+                <div id="prep-progress-bar" class="prep-progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts loaded sequentially to avoid CORS issues locally -->
+    <script>
+/**
+ * Storage Module
+ * Handles interactions with browser localStorage.
+ * Uses functional principles (pure functions without side effects outside its scope).
+ */
+
+const StorageHandler = (() => {
+    // Save data safely to localStorage
+    const save = (key, data) => {
+        try {
+            const serializedData = JSON.stringify(data);
+            localStorage.setItem(key, serializedData);
+        } catch (error) {
+            console.error("Error saving to localStorage", error);
+        }
+    };
+
+    // Load data from localStorage with a fallback default value
+    const load = (key, defaultValue) => {
+        try {
+            const serializedData = localStorage.getItem(key);
+            if (serializedData === null) return defaultValue;
+            return JSON.parse(serializedData);
+        } catch (error) {
+            console.error("Error loading from localStorage", error);
+            return defaultValue;
+        }
+    };
+
+    return { save, load };
+})();
+</script>
+    <script>
+/**
+ * Timer Engine Module
+ * Manages the countdown logic, state transitions (Work/Rest), and Audio Web API.
+ */
+
+const TimerEngine = (() => {
+    let intervalId = null;
+    
+    // Web Audio API for soft beep notification
+    const playBeep = () => {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContext) return;
+        
+        const ctx = new AudioContext();
+        const osc = ctx.createOscillator();
+        const gainNode = ctx.createGain();
+
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime); // C5 note
+        gainNode.gain.setValueAtTime(0.1, ctx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1);
+
+        osc.connect(gainNode);
+        gainNode.connect(ctx.destination);
+
+        osc.start();
+        osc.stop(ctx.currentTime + 1);
+    };
+
+    // Calculate percentage for the circular UI progress
+    const calculateProgress = (timeLeft, totalTime) => {
+        return ((totalTime - timeLeft) / totalTime) * 360;
+    };
+
+    // Format seconds into MM:SS string
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    };
+
+    // Start/Resume countdown
+    const start = (tickCallback, endCallback) => {
+        if (intervalId) return;
+        intervalId = setInterval(() => {
+            const isDone = tickCallback();
+            if (isDone) {
+                stop();
+                playBeep();
+                endCallback();
+            }
+        }, 1000);
+    };
+
+    // Pause/Stop countdown
+    const stop = () => {
+        if (intervalId) {
+            clearInterval(intervalId);
+            intervalId = null;
+        }
+    };
+
+    return { start, stop, formatTime, calculateProgress, playBeep };
+})();
+</script>
+    <script>
+/**
+ * Report Exporter Module
+ * Generates a high-resolution PNG daily report card using native HTML5 Canvas API.
+ * Follows functional programming principles with isolated rendering rules.
+ */
+
+const ReportExporter = (() => {
+    // --- 1. Visual & Layout Configuration Rules ---
+    const CONFIG = {
+        width: 800,
+        baseHeight: 440,
+        rowHeight: 58,
+        padding: 50,
+        colors: {
+            bg: '#0a0a0a',
+            cardBg: 'rgba(255, 255, 255, 0.04)',
+            cardBorder: 'rgba(255, 255, 255, 0.1)',
+            textMain: '#f3f4f6',
+            textMuted: '#9ca3af',
+            accentBlue: '#3b82f6',
+            accentPurple: '#8b5cf6',
+            successGreen: '#10b981'
+        },
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+    };
+
+    // Pure helper to mask spoiler tasks or truncate overly long task strings
+    const formatTaskText = (task, globalSpoiler) => {
+        if (task.isSpoiler || globalSpoiler) {
+            return '•••••••••••••••••••••••• (Spoiler)';
+        }
+        return task.text.length > 52 ? `${task.text.substring(0, 52)}...` : task.text;
+    };
+
+    // Helper to draw rounded rectangles on Canvas
+    const drawRoundedRect = (ctx, x, y, width, height, radius, fillStyle, strokeStyle = null) => {
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, radius);
+        if (fillStyle) {
+            ctx.fillStyle = fillStyle;
+            ctx.fill();
+        }
+        if (strokeStyle) {
+            ctx.strokeStyle = strokeStyle;
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+        }
+    };
+
+    // Draw Gemini-inspired ambient background glows
+    const drawAmbientBackground = (ctx, width, height) => {
+        ctx.fillStyle = CONFIG.colors.bg;
+        ctx.fillRect(0, 0, width, height);
+
+        // Top-left Electric Blue Glow
+        const blueGlow = ctx.createRadialGradient(width * 0.15, height * 0.15, 20, width * 0.15, height * 0.15, 420);
+        blueGlow.addColorStop(0, 'rgba(59, 130, 246, 0.28)');
+        blueGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = blueGlow;
+        ctx.fillRect(0, 0, width, height);
+
+        // Bottom-right Deep Purple Glow
+        const purpleGlow = ctx.createRadialGradient(width * 0.85, height * 0.85, 20, width * 0.85, height * 0.85, 420);
+        purpleGlow.addColorStop(0, 'rgba(139, 92, 246, 0.25)');
+        purpleGlow.addColorStop(1, 'transparent');
+        ctx.fillStyle = purpleGlow;
+        ctx.fillRect(0, 0, width, height);
+    };
+
+    // --- 2. Main Canvas Generator & Downloader ---
+    const exportDailyReport = ({ works = [], stats = {}, dates = {}, spoilerAllWorks = false }) => {
+        const completedTasks = works.filter(task => task.completed);
+        const taskCount = Math.max(1, completedTasks.length);
+        const canvasHeight = CONFIG.baseHeight + (taskCount * CONFIG.rowHeight);
+
+        const canvas = document.createElement('canvas');
+        // Use 2x scale for crisp Retina/High-DPI image quality
+        const scale = 2;
+        canvas.width = CONFIG.width * scale;
+        canvas.height = canvasHeight * scale;
+
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+
+        // 1. Background & Outer Glass Card
+        drawAmbientBackground(ctx, CONFIG.width, canvasHeight);
+        drawRoundedRect(
+            ctx,
+            CONFIG.padding,
+            CONFIG.padding,
+            CONFIG.width - CONFIG.padding * 2,
+            canvasHeight - CONFIG.padding * 2,
+            24,
+            CONFIG.colors.cardBg,
+            CONFIG.colors.cardBorder
+        );
+
+        const innerX = CONFIG.padding + 36;
+        const innerWidth = CONFIG.width - (CONFIG.padding + 36) * 2;
+        let currentY = CONFIG.padding + 55;
+
+        // 2. Header Title
+        ctx.fillStyle = CONFIG.colors.textMain;
+        ctx.font = `700 28px ${CONFIG.fontFamily}`;
+        ctx.textAlign = 'left';
+        ctx.fillText('Deep Focus — Daily Report', innerX, currentY);
+
+        // 3. Dates (Shamsi & Gregorian)
+        currentY += 34;
+        ctx.fillStyle = CONFIG.colors.textMain;
+        ctx.font = `500 16px ${CONFIG.fontFamily}`;
+        ctx.fillText(`${dates.shamsi || ''}   |   ${dates.gregorian || ''}`, innerX, currentY);
+
+        // 4. Stats Summary Badges (Pomodoros & Completed Count)
+        currentY += 30;
+        const badgeWidth = (innerWidth - 20) / 2;
+        
+        // Pomodoro Stat Box
+        drawRoundedRect(ctx, innerX, currentY, badgeWidth, 85, 16, 'rgba(59, 130, 246, 0.12)', 'rgba(59, 130, 246, 0.35)');
+        ctx.fillStyle = CONFIG.colors.accentBlue;
+        ctx.font = `700 32px ${CONFIG.fontFamily}`;
+        ctx.fillText(`${stats.pomodorosCompleted || 0}`, innerX + 24, currentY + 48);
+        ctx.fillStyle = CONFIG.colors.textMuted;
+        ctx.font = `500 14px ${CONFIG.fontFamily}`;
+        ctx.fillText('Pomodoros Completed', innerX + 24, currentY + 70);
+
+        // Completed Tasks Stat Box
+        const secondBadgeX = innerX + badgeWidth + 20;
+        drawRoundedRect(ctx, secondBadgeX, currentY, badgeWidth, 85, 16, 'rgba(139, 92, 246, 0.12)', 'rgba(139, 92, 246, 0.35)');
+        ctx.fillStyle = CONFIG.colors.accentPurple;
+        ctx.font = `700 32px ${CONFIG.fontFamily}`;
+        ctx.fillText(`${completedTasks.length}`, secondBadgeX + 24, currentY + 48);
+        ctx.fillStyle = CONFIG.colors.textMuted;
+        ctx.font = `500 14px ${CONFIG.fontFamily}`;
+        ctx.fillText('Tasks Accomplished', secondBadgeX + 24, currentY + 70);
+
+        // 5. Completed Tasks List Section
+        currentY += 125;
+        ctx.fillStyle = CONFIG.colors.textMuted;
+        ctx.font = `600 15px ${CONFIG.fontFamily}`;
+        ctx.fillText('COMPLETED WORKS', innerX, currentY);
+
+        currentY += 20;
+
+        if (completedTasks.length === 0) {
+            drawRoundedRect(ctx, innerX, currentY, innerWidth, 46, 12, 'rgba(255, 255, 255, 0.02)');
+            ctx.fillStyle = CONFIG.colors.textMuted;
+            ctx.font = `italic 15px ${CONFIG.fontFamily}`;
+            ctx.fillText('No completed tasks recorded yet today.', innerX + 20, currentY + 28);
+        } else {
+            completedTasks.forEach((task) => {
+                drawRoundedRect(ctx, innerX, currentY, innerWidth, 46, 12, 'rgba(0, 0, 0, 0.3)', 'rgba(255, 255, 255, 0.06)');
+
+                // Checkmark icon
+                ctx.fillStyle = CONFIG.colors.successGreen;
+                ctx.font = `700 16px ${CONFIG.fontFamily}`;
+                ctx.fillText('✓', innerX + 18, currentY + 29);
+
+                // Task text (auto-detects Persian/RTL or English/LTR characters)
+                const displayText = formatTaskText(task, spoilerAllWorks);
+                ctx.fillStyle = CONFIG.colors.textMain;
+                ctx.font = `500 16px ${CONFIG.fontFamily}`;
+                ctx.fillText(displayText, innerX + 45, currentY + 29);
+
+                currentY += CONFIG.rowHeight;
+            });
+        }
+
+        // 6. Trigger Instant PNG Download
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const safeDate = new Date().toISOString().slice(0, 10);
+        link.download = `deep-focus-report-${safeDate}.png`;
+        link.href = dataUrl;
+        link.click();
+    };
+
+    return { exportDailyReport };
+})();
+</script>
+    <script>
 /**
  * Main Application Logic (app.js)
  * Modular, DRY, and Functional architecture binding State, UI, Storage, Exporter, and Timer.
@@ -674,3 +1074,7 @@ const initApp = () => {
 };
 
 initApp();
+</script>
+    
+</body>
+</html>

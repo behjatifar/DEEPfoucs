@@ -351,6 +351,85 @@ h2, h3 { margin-bottom: 16px; font-weight: 500; }
     color: #ef4444;
 }
 
+/* --- 10-Second Session Preparation Overlay --- */
+.prep-panel {
+    max-width: 500px;
+    text-align: right;
+    padding: 28px;
+    border: 1px solid rgba(139, 92, 246, 0.35);
+    box-shadow: 0 0 50px rgba(59, 130, 246, 0.2);
+    animation: breatheGlow 4s infinite ease-in-out;
+}
+
+@keyframes breatheGlow {
+    0%, 100% { box-shadow: 0 0 35px rgba(59, 130, 246, 0.15); }
+    50% { box-shadow: 0 0 65px rgba(139, 92, 246, 0.35); }
+}
+
+.prep-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.prep-badge {
+    font-size: 0.8rem;
+    color: var(--accent-blue);
+    background: rgba(59, 130, 246, 0.12);
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.prep-title {
+    font-size: 1.2rem;
+    color: var(--text-main);
+    margin-bottom: 18px;
+    font-weight: 600;
+}
+
+.prep-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.prep-list li {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--glass-border);
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: var(--text-main);
+}
+
+.prep-footer {
+    text-align: center;
+    color: var(--accent-purple);
+    font-weight: 500;
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+}
+
+.prep-progress-track {
+    width: 100%;
+    height: 5px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.prep-progress-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    transition: width 1s linear;
+}
+
 
 /* =========================================
    Responsive Design (Tablet & Mobile UX)

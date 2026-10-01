@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deep Focus Dashboard</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23131b42'/%3E%3Cstop offset='100%25' stop-color='%23070a1c'/%3E%3C/linearGradient%3E%3ClinearGradient id='cyan' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0%25' stop-color='%23a5f3fc'/%3E%3Cstop offset='100%25' stop-color='%2300bcd4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23bg)' stroke='%232c3e75' stroke-width='2'/%3E%3Cpath d='M16 18V13h5M48 18V13h-5' fill='none' stroke='%2367e8f9' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M22 52h20M25 36c0 6-6 8-6 14h26c0-6-6-8-6-14-3-2-4-4-7-4s-4 2-7 4z' fill='none' stroke='url(%23cyan)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M23 49h18l-9-8-9 8z' fill='%2322d3ee'/%3E%3Ccircle cx='32' cy='24' r='12' fill='%230f172a' stroke='url(%23cyan)' stroke-width='3.5'/%3E%3Ccircle cx='32' cy='24' r='6' fill='none' stroke='%2338bdf8' stroke-width='1.5'/%3E%3Cpath d='M32 17l1.8 5.2L39 24l-5.2 1.8L32 31l-1.8-5.2L25 24l5.2-1.8z' fill='%23ffffff'/%3E%3C/svg%3E">
     <link rel="stylesheet" href="./style/style.css">
 </head>
 <body>
@@ -97,6 +98,21 @@
                 </div>
             </div>
             <ul id="trash-list" class="item-list trash-items"></ul>
+        </div>
+    </div>
+    <!-- 10-Second Session Preparation Overlay -->
+    <div id="prep-overlay" class="modal-overlay hidden">
+        <div class="modal-panel glass-panel prep-panel" dir="rtl">
+            <div class="prep-header">
+                <span class="prep-badge">آماده‌سازی ذهن (<strong id="prep-countdown">10</strong>s)</span>
+                <button id="btn-skip-prep" class="btn secondary btn-sm">رد کردن ⏭️</button>
+            </div>
+            <h3 class="prep-title">🚀 در حال شروع سشن جدید هستیم...</h3>
+            <ul id="prep-messages" class="prep-list"></ul>
+            <p id="prep-footer" class="prep-footer"></p>
+            <div class="prep-progress-track">
+                <div id="prep-progress-bar" class="prep-progress-bar"></div>
+            </div>
         </div>
     </div>
 
