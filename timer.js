@@ -1,16 +1,20 @@
 /**
- * Timer Engine Module
- * Manages the countdown logic, state transitions (Work/Rest), and Audio Web API.
+ * Timer Engine Module (timer.js)
+ * Uses delta-time (Date.now()) instead of simple interval counting
+ * to prevent timer drift or freezing when browser tabs are inactive/minimized.
  */
 
 const TimerEngine = (() => {
     let intervalId = null;
-    
+    let targetEndTime = null;
+    let activeTickCallback = null;
+    let activeEndCallback = null;
+
     // Web Audio API for soft beep notification
     const playBeep = () => {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         if (!AudioContext) return;
-        
+
         const ctx = new AudioContext();
         const osc = ctx.createOscillator();
         const gainNode = ctx.createGain();
@@ -27,38 +31,67 @@ const TimerEngine = (() => {
         osc.stop(ctx.currentTime + 1);
     };
 
-    // Calculate percentage for the circular UI progress
+    // Pure function: Calculate degrees (0-360) for circular progress bar
     const calculateProgress = (timeLeft, totalTime) => {
         return ((totalTime - timeLeft) / totalTime) * 360;
     };
 
-    // Format seconds into MM:SS string
+    // Pure function: Format seconds into MM:SS string
     const formatTime = (seconds) => {
-        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
-        const s = (seconds % 60).toString().padStart(2, '0');
+        const safeSeconds = Math.max(0, seconds);
+        const m = Math.floor(safeSeconds / 60).toString().padStart(2, '0');
+        const s = (safeSeconds % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     };
 
-    // Start/Resume countdown
-    const start = (tickCallback, endCallback) => {
-        if (intervalId) return;
-        intervalId = setInterval(() => {
-            const isDone = tickCallback();
-            if (isDone) {
-                stop();
-                playBeep();
-                endCallback();
-            }
-        }, 1000);
+    // Sync remaining time against real system clock
+    const syncWithSystemClock = () => {
+        if (!targetEndTime) return;
+
+        const remainingMs = targetEndTime - Date.now();
+        const remainingSeconds = Math.max(0, Math.ceil(remainingMs / 1000));
+
+        if (activeTickCallback) {
+            activeTickCallback(remainingSeconds);
+        }
+
+        if (remainingSeconds <= 0) {
+            const endCb = activeEndCallback;
+            stop();
+            playBeep();
+            if (endCb) endCb();
+        }
     };
 
-    // Pause/Stop countdown
+    // Start countdown using exact target timestamp
+    const start = (initialTimeLeftSeconds, tickCallback, endCallback) => {
+        if (intervalId) return;
+
+        targetEndTime = Date.now() + (initialTimeLeftSeconds * 1000);
+        activeTickCallback = tickCallback;
+        activeEndCallback = endCallback;
+
+        // Run every 500ms for snappy UI updates and accurate drift correction
+        intervalId = setInterval(syncWithSystemClock, 500);
+    };
+
+    // Stop/Pause countdown
     const stop = () => {
         if (intervalId) {
             clearInterval(intervalId);
             intervalId = null;
         }
+        targetEndTime = null;
+        activeTickCallback = null;
+        activeEndCallback = null;
     };
+
+    // Immediately recalculate time when user returns to the tab
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden && intervalId) {
+            syncWithSystemClock();
+        }
+    });
 
     return { start, stop, formatTime, calculateProgress, playBeep };
 })();

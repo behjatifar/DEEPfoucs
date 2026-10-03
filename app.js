@@ -277,7 +277,8 @@ const startSessionPrep = () => {
 };
 
 const updateTimerUI = () => {
-    DOM.timeDisplay.textContent = TimerEngine.formatTime(currentTimer.timeLeft);
+const formatted = TimerEngine.formatTime(currentTimer.timeLeft);
+    DOM.timeDisplay.textContent = formatted;
     const degrees = TimerEngine.calculateProgress(currentTimer.timeLeft, currentTimer.totalTime);
     const color = currentTimer.mode === 'work' ? 'var(--accent-blue)' : 'var(--accent-purple)';
 
@@ -285,12 +286,16 @@ const updateTimerUI = () => {
     DOM.modeDisplay.textContent = currentTimer.mode === 'work' ? 'Work Mode' : 'Rest Mode';
     DOM.btnToggle.textContent = currentTimer.isRunning ? 'Pause' : 'Start';
     DOM.body.classList.toggle('rest-mode', currentTimer.mode === 'rest');
+
+    // Update browser tab title so user can see countdown while in other tabs
+    document.title = currentTimer.isRunning
+        ? `(${formatted}) ${currentTimer.mode === 'work' ? 'Work' : 'Rest'} - Deep Focus`
+        : 'Deep Focus Dashboard';
 };
 
-const handleTick = () => {
-    currentTimer.timeLeft -= 1;
+const handleTick = (remainingSeconds) => {
+    currentTimer.timeLeft = remainingSeconds;
     updateTimerUI();
-    return currentTimer.timeLeft <= 0;
 };
 
 const handleTimerEnd = () => {
@@ -626,7 +631,7 @@ const setupEvents = () => {
 
         if (currentTimer.isRunning) {
             if (isFreshWorkSession) startSessionPrep();
-            TimerEngine.start(handleTick, handleTimerEnd);
+            TimerEngine.start(currentTimer.timeLeft,handleTick, handleTimerEnd);
         } else {
             stopSessionPrep();
             TimerEngine.stop();
